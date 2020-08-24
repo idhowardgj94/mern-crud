@@ -11,6 +11,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Validate validate value
+func Validate(data models.User) map[string]string {
+	// validate
+	errors := make(map[string]string)
+	vname := models.SanitizeName(data.Name)
+	vemail := models.SanitizeEmail(data.Email)
+	if vemail == "" {
+		errors["email"] = "email is required!"
+	}
+	if data.Age < 5 {
+		errors["age"] = "you are too young to this!"
+	}
+	if data.Age > 130 {
+		errors["ages"] = "your are too old to this!"
+	}
+	vgender := models.SanitizeGender(data.Gender)
+	if vgender == "" {
+		errors["gender"] = "gender is required"
+	}
+	if vname == "" {
+		errors["name"] = "name is required"
+	}
+	return errors
+}
+
 // UserRoute user's route
 func UserRoute(users *gin.RouterGroup) {
 	users.GET("/:id", func(c *gin.Context) {
@@ -57,7 +82,16 @@ func UserRoute(users *gin.RouterGroup) {
 		defer client.Disconnect(ctx)
 
 		var data = new(models.User)
-		c.ShouldBindJSON(&data)
+		c.ShouldBindJSON(data)
+
+		errs := Validate(*data)
+		if len(errs) != 0 {
+			c.JSON(400, models.Response{
+				Success: false,
+				Msg:     &errs,
+			})
+			return
+		}
 
 		collection := client.Database("mern-crud").Collection("users")
 		result, _ := collection.InsertOne(ctx, &data)
