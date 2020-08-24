@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"mem-crud-go/db"
 	"mem-crud-go/routes"
 
 	"github.com/gin-gonic/gin"
@@ -14,14 +15,14 @@ import (
 func main() {
 	// default route
 	r := gin.Default()
-
-	client, ctx, cancel := DbConnect()
-	defer cancel()
-	defer client.Disconnect(ctx)
 	users := r.Group("/api/users")
+
 	routes.UserRoute(users)
 
 	r.GET("/test", func(c *gin.Context) {
+		client, ctx, cancel := db.DbConnect()
+		defer cancel()
+		defer client.Disconnect(ctx)
 		findUser(ctx, client)
 		c.JSON(200, gin.H{
 			"message": "test",
