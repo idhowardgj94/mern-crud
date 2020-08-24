@@ -3,20 +3,26 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
+
+	"mem-crud-go/routes"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
 	// default route
 	r := gin.Default()
+
+	client, ctx, cancel := DbConnect()
+	defer cancel()
+	defer client.Disconnect(ctx)
+	users := r.Group("/api/users")
+	routes.UserRoute(users)
+
 	r.GET("/test", func(c *gin.Context) {
-		findUser()
+		findUser(ctx, client)
 		c.JSON(200, gin.H{
 			"message": "test",
 		})
@@ -25,31 +31,21 @@ func main() {
 	r.Run()
 }
 
-func findUser() {
-	var result struct {
-		Name string
-		Sex  string
-	}
+var result struct {
+	Name string
+	Sex  string
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
-
+func findUser(ctx context.Context, client *mongo.Client) {
+	println("inside finduser")
 	collection := client.Database("mern-crud").Collection("users")
 
 	filter := bson.M{"name": "Howard Chang"}
-	err = collection.FindOne(ctx, filter).Decode(&result)
-
+	err := collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-
+	println("inside finduser")
 	fmt.Printf("%+v\n", result)
 	fmt.Printf("%s", result.Name)
 }
