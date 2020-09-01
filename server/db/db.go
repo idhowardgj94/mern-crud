@@ -8,8 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// DbConnect ...
-func DbConnect() (*mongo.Client, context.Context, context.CancelFunc) {
+// Connect -> Client -> Context -> CancelFunc
+func Connect() (*mongo.Client, context.Context, context.CancelFunc) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 

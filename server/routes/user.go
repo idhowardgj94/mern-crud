@@ -14,7 +14,7 @@ import (
 // UserRoute user's route
 func UserRoute(users *gin.RouterGroup) {
 	users.GET("/:id", func(c *gin.Context) {
-		client, ctx, cancel := db.DbConnect()
+		client, ctx, cancel := db.Connect()
 		defer cancel()
 		defer client.Disconnect(ctx)
 
@@ -39,7 +39,7 @@ func UserRoute(users *gin.RouterGroup) {
 	})
 
 	users.GET("/", func(c *gin.Context) {
-		client, ctx, cancel := db.DbConnect()
+		client, ctx, cancel := db.Connect()
 		defer cancel()
 		defer client.Disconnect(ctx)
 
@@ -52,7 +52,7 @@ func UserRoute(users *gin.RouterGroup) {
 	})
 
 	users.POST("/", func(c *gin.Context) {
-		client, ctx, cancel := db.DbConnect()
+		client, ctx, cancel := db.Connect()
 		defer cancel()
 		defer client.Disconnect(ctx)
 
@@ -84,7 +84,7 @@ func UserRoute(users *gin.RouterGroup) {
 
 	users.PUT("/:id", func(c *gin.Context) {
 		var id, _ = primitive.ObjectIDFromHex(c.Param("id"))
-		client, ctx, cancel := db.DbConnect()
+		client, ctx, cancel := db.Connect()
 		defer cancel()
 		defer client.Disconnect(ctx)
 		collection := client.Database("mern-crud").Collection("users")
@@ -119,7 +119,7 @@ func UserRoute(users *gin.RouterGroup) {
 	})
 
 	users.DELETE("/:id", func(c *gin.Context) {
-		client, ctx, cancel := db.DbConnect()
+		client, ctx, cancel := db.Connect()
 		defer cancel()
 		defer client.Disconnect(ctx)
 		collection := client.Database("mern-crud").Collection("users")
